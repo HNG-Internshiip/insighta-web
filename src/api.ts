@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { InternalAxiosRequestConfig } from "axios";
 
-const BASE = import.meta.env.VITE_API_URL || "https://your-backend.railway.app";
+const BASE = import.meta.env.VITE_API_URL;
 
 export const api = axios.create({
   baseURL:         BASE,
