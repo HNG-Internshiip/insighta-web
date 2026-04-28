@@ -8,4 +8,10 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  build: {
+    outDir: "dist",
+  },
+  server: {
+    port: 5173,
+  },
 })
