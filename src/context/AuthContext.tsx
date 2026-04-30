@@ -19,6 +19,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await apiLogout().catch(() => {});
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("refresh_token");
     setUser(null);
     window.location.href = "/login";
   }, []);

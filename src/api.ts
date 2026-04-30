@@ -1,12 +1,19 @@
 import axios from "axios";
 import type { InternalAxiosRequestConfig } from "axios";
 
-const BASE = import.meta.env.VITE_API_URL;
+const BASE = import.meta.env.VITE_API_URL || "https://your-backend.railway.app";
 
 export const api = axios.create({
   baseURL:         BASE,
   withCredentials: true,
   headers: { "X-API-Version": "1" },
+});
+
+// Attach token from sessionStorage if present (cross-domain OAuth flow)
+api.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem("access_token");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
 });
 
 // Auto-refresh on 401
@@ -20,10 +27,18 @@ api.interceptors.response.use(
     config._retry = true;
 
     if (!refreshing) {
-      refreshing = api.post("/auth/refresh")
-        .then(() => { refreshing = null; })
+      refreshing = api.post("/auth/refresh", {
+        refresh_token: sessionStorage.getItem("refresh_token"),
+      })
+        .then((r) => {
+          sessionStorage.setItem("access_token",  r.data.access_token);
+          sessionStorage.setItem("refresh_token", r.data.refresh_token);
+          refreshing = null;
+        })
         .catch(() => {
           refreshing = null;
+          sessionStorage.removeItem("access_token");
+          sessionStorage.removeItem("refresh_token");
           window.location.href = "/login";
         });
     }
