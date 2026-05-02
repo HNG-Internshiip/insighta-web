@@ -1,8 +1,23 @@
-// Only exports a single component — satisfies react-refresh/only-export-components
 import React, { useState, useEffect, useCallback } from "react";
-import { getMe, logout as apiLogout }              from "../api";
-import { AuthContext }                             from "./authContext";
-import type { User }                               from "./authContext";
+import { getMe, logout as apiLogout } from "../api";
+
+export interface User {
+  id:         string;
+  username:   string;
+  email:      string | null;
+  avatar_url: string | null;
+  role:       string;
+  is_active:  boolean;
+}
+
+export interface AuthCtx {
+  user:    User | null;
+  loading: boolean;
+  logout:  () => Promise<void>;
+  refresh: () => Promise<void>;
+}
+
+export const AuthContext = React.createContext<AuthCtx | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser]       = useState<User | null>(null);
@@ -26,6 +41,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Don't attempt getMe on the callback page — tokens aren't stored yet
+    // AuthCallback will call refresh() itself after storing tokens
+    if (window.location.pathname === "/auth/callback") {
+      setLoading(false);
+      return;
+    }
     void (async () => {
       await refresh();
       setLoading(false);
