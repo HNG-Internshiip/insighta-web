@@ -12,7 +12,9 @@ import { AuthCallback } from "./pages/AuthCallback";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return (
+  const isCallback = window.location.pathname === "/auth/callback";
+
+  if (loading || isCallback) return (
     <div style={{ minHeight: "100vh", background: "#0d1117", display: "flex",
       alignItems: "center", justifyContent: "center", color: "#58a6ff", fontSize: 18 }}>
       Loading...
@@ -50,9 +52,9 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login"     element={<Login />} />
+          <Route path="/login"        element={<Login />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/"             element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={
             <ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>
           }/>
